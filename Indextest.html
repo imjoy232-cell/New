@@ -6,19 +6,16 @@
   <title>Be My Valentine 💖</title>
 
   <!-- Fonts -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Poppins:wght@300;400&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --pink-1: #f8cdda;
-      --pink-2: #fbd3e9;
-      --accent-1: #ff758c;
-      --accent-2: #ff7eb3;
+      --bg1: #f8cdda;
+      --bg2: #fbd3e9;
+      --accent1: #ff758c;
+      --accent2: #ff7eb3;
       --text-dark: #333;
-      --text-light: #555;
+      --text-light: #666;
     }
 
     * {
@@ -29,34 +26,33 @@
       margin: 0;
       min-height: 100vh;
       display: flex;
-      justify-content: center;
       align-items: center;
-      background: linear-gradient(135deg, var(--pink-1), var(--pink-2));
+      justify-content: center;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
       font-family: "Poppins", sans-serif;
       overflow: hidden;
     }
 
     .card {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 40px 30px;
-      border-radius: 25px;
-      text-align: center;
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 26px;
+      padding: 42px 32px;
       width: 90%;
-      max-width: 360px;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
-      animation: fadeIn 1.4s ease;
-      position: relative;
+      max-width: 380px;
+      text-align: center;
+      box-shadow: 0 30px 70px rgba(0,0,0,0.18);
+      animation: slideIn 1.2s ease;
     }
 
     .heart {
-      font-size: 46px;
+      font-size: 48px;
       margin-bottom: 10px;
-      animation: heartbeat 2s infinite;
+      animation: pulse 2s infinite;
     }
 
     h1 {
       font-family: "Playfair Display", serif;
-      font-size: 24px;
+      font-size: 26px;
       margin: 10px 0;
       color: var(--text-dark);
     }
@@ -64,64 +60,67 @@
     p {
       font-size: 16px;
       color: var(--text-light);
-      margin-bottom: 28px;
-      line-height: 1.5;
+      line-height: 1.6;
+      margin-bottom: 32px;
     }
 
-    .buttons {
+    .actions {
       position: relative;
-      height: 60px;
+      height: 64px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     button {
-      padding: 12px 28px;
-      border-radius: 30px;
       border: none;
+      border-radius: 30px;
+      padding: 13px 30px;
       font-size: 15px;
       cursor: pointer;
-      font-family: "Poppins", sans-serif;
+      font-family: inherit;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     #yesBtn {
-      background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
       color: #fff;
-      box-shadow: 0 10px 25px rgba(255, 120, 160, 0.4);
+      box-shadow: 0 12px 28px rgba(255, 120, 160, 0.45);
     }
 
     #yesBtn:hover {
-      transform: scale(1.08);
+      transform: scale(1.1);
     }
 
     #noBtn {
-      background: #f1f1f1;
-      color: #555;
       position: absolute;
-      left: 55%;
+      right: 10%;
+      background: #f2f2f2;
+      color: #555;
     }
 
     .floating-heart {
       position: fixed;
       bottom: -20px;
       font-size: 18px;
-      opacity: 0.6;
+      opacity: 0.7;
       animation: floatUp linear forwards;
       pointer-events: none;
     }
 
-    @keyframes heartbeat {
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(25px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.25); }
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
     @keyframes floatUp {
       from { transform: translateY(0); opacity: 0; }
-      20% { opacity: 0.6; }
+      20% { opacity: 0.7; }
       to { transform: translateY(-120vh); opacity: 0; }
     }
   </style>
@@ -130,61 +129,54 @@
 <body>
 
   <!-- Music -->
-  <audio id="bgMusic" loop>
-    <source
-      src="https://www.bensound.com/bensound-music/bensound-love.mp3"
-      type="audio/mpeg"
-    />
+  <audio id="music" loop>
+    <source src="https://www.bensound.com/bensound-music/bensound-love.mp3" type="audio/mpeg">
   </audio>
 
-  <main class="card" id="card">
+  <div class="card" id="card">
     <div class="heart">💗</div>
     <h1>My Dearest <span id="name">Rupam</span></h1>
     <p>
-      Every moment feels softer with you.<br />
+      Every moment feels softer with you.<br>
       Will you be my Valentine?
     </p>
 
-    <div class="buttons">
+    <div class="actions">
       <button id="yesBtn">Yes, always 💕</button>
       <button id="noBtn">No</button>
     </div>
-  </main>
+  </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const noBtn = document.getElementById("noBtn");
       const yesBtn = document.getElementById("yesBtn");
+      const noBtn = document.getElementById("noBtn");
       const card = document.getElementById("card");
-      const music = document.getElementById("bgMusic");
+      const music = document.getElementById("music");
 
-      // Mobile-safe music start
-      document.body.addEventListener(
-        "click",
-        () => {
-          music.play().catch(() => {});
-        },
-        { once: true }
-      );
+      // Start music on first interaction (mobile-safe)
+      document.body.addEventListener("click", () => {
+        music.play().catch(() => {});
+      }, { once: true });
 
-      // No button escape
+      // Move "No" button smoothly
       noBtn.addEventListener("mouseenter", () => {
-        const x = Math.random() * 120 - 60;
-        const y = Math.random() * 40 - 20;
+        const x = Math.random() * 140 - 70;
+        const y = Math.random() * 50 - 25;
         noBtn.style.transform = `translate(${x}px, ${y}px)`;
       });
 
-      // Yes button success
+      // Yes button action
       yesBtn.addEventListener("click", () => {
         card.innerHTML = `
           <div class="heart">💖</div>
           <h1>You chose love</h1>
           <p>
-            And I promise to choose you,<br />
+            And I promise to choose you,<br>
             every single day.
           </p>
         `;
-        spawnHearts(30);
+        spawnHearts(28);
       });
 
       function spawnHearts(count) {
