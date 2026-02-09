@@ -2,61 +2,94 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>For Nancy 💖</title>
 
-  <!-- ================== STYLES ================== -->
   <style>
     :root {
-      --primary: #ff4d88;
-      --secondary: #e6005c;
-      --bg-start: #ffccd5;
-      --bg-end: #fff0f3;
+      --pink-main: #ff4d88;
+      --pink-dark: #e6005c;
+      --pink-light: #ffccd5;
+      --pink-soft: #fff0f3;
+      --card-bg: #ffffff;
+      --text-soft: #555;
+    }
+
+    /* ---------- RESET ---------- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
       font-family: "Comic Sans MS", cursive;
-      background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--pink-light), var(--pink-soft));
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
       overflow: hidden;
       text-align: center;
     }
 
-    .card {
-      background: #fff;
-      padding: 36px;
+    /* ---------- CARD ---------- */
+    .valentine-card {
+      background: var(--card-bg);
+      padding: 2.5rem;
       border-radius: 24px;
       box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
       max-width: 340px;
+      width: 90%;
       z-index: 2;
     }
 
-    h1 {
-      color: var(--secondary);
-      margin-bottom: 24px;
-      transition: all 0.3s ease;
+    .valentine-question {
+      color: var(--pink-dark);
+      margin-bottom: 1.6rem;
+      min-height: 90px;
     }
 
-    .actions button {
+    /* ---------- BUTTONS ---------- */
+    .actions {
+      margin-top: 1rem;
+    }
+
+    .btn {
       border: none;
       border-radius: 14px;
       cursor: pointer;
       font-size: 16px;
       padding: 12px 24px;
       margin: 10px;
-      transition: all 0.3s ease;
+      transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease,
+        background-color 0.3s ease;
     }
 
-    #yes {
-      background: var(--primary);
+    /* YES button – heartbeat + glow */
+    .btn-yes {
+      background: var(--pink-main);
       color: #fff;
+      animation: heartbeat 1.8s infinite;
+      box-shadow: 0 0 0 rgba(255, 77, 136, 0.6);
     }
 
-    #no {
+    .btn-yes:hover {
+      box-shadow: 0 0 18px rgba(255, 77, 136, 0.8);
+      transform: scale(1.08);
+    }
+
+    /* NO button – playful */
+    .btn-no {
       background: #ddd;
+      color: #333;
+    }
+
+    .btn-no.shake {
+      animation: shake 0.35s;
     }
 
     .hint {
@@ -65,12 +98,29 @@
       margin-top: 10px;
     }
 
-    /* Floating hearts */
+    /* ---------- ANIMATIONS ---------- */
+    @keyframes heartbeat {
+      0%   { transform: scale(1); }
+      30%  { transform: scale(1.12); }
+      50%  { transform: scale(1); }
+      70%  { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      50% { transform: translateX(4px); }
+      75% { transform: translateX(-4px); }
+      100% { transform: translateX(0); }
+    }
+
+    /* ---------- FLOATING HEARTS ---------- */
     .heart {
       position: fixed;
       bottom: -20px;
       pointer-events: none;
-      color: var(--primary);
+      color: var(--pink-main);
       opacity: 0.8;
       animation: floatUp linear forwards;
     }
@@ -85,107 +135,123 @@
         opacity: 0;
       }
     }
+
+    /* ---------- FINAL MESSAGE ---------- */
+    .final-message p {
+      margin-top: 15px;
+      font-size: 15px;
+      color: var(--text-soft);
+    }
   </style>
 </head>
 
 <body>
 
-  <!-- ================== MUSIC ================== -->
+  <!-- 🎵 Soft romantic music -->
   <audio id="bgMusic" loop>
-    <source src="https://cdn.pixabay.com/audio/2023/03/28/audio_f1e6f0b9e6.mp3" type="audio/mpeg">
+    <source
+      src="https://cdn.pixabay.com/audio/2023/03/28/audio_f1e6f0b9e6.mp3"
+      type="audio/mpeg"
+    />
   </audio>
 
-  <!-- ================== CONTENT ================== -->
-  <main class="card">
-    <h1 id="question">
+  <main class="valentine-card" id="card">
+    <h1 class="valentine-question" id="question">
       Nancy 💖<br />
       Will you be my Valentine?
     </h1>
 
     <div class="actions">
-      <button id="yes">Yes 💘</button>
-      <button id="no">No 🙈</button>
+      <button class="btn btn-yes" id="yesBtn">Yes 💘</button>
+      <button class="btn btn-no" id="noBtn">No 🙈</button>
     </div>
 
     <div class="hint">(Try clicking No 😉)</div>
   </main>
 
-  <!-- ================== SCRIPT ================== -->
   <script>
-    /* ---------- CONFIG ---------- */
-    const CONFIG = {
-      yesGrow: 6,
-      noShrink: 2,
-      minNoSize: 6,
-      heartInterval: 600,
-      musicVolume: 0.25
-    };
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const question = document.getElementById("question");
+    const card = document.getElementById("card");
+    const music = document.getElementById("bgMusic");
 
-    const MESSAGES = [
+    let yesSize = 16;
+    let noSize = 16;
+    let index = 0;
+    let musicStarted = false;
+
+    const messages = [
       "Nancy… are you sure? 🥺",
-      "That touched my heart 💔",
+      "That kind of hurt 💔",
       "I really like you 💕",
       "Please don’t say no 😢",
-      "I promise warmth and smiles 😊",
+      "I promise smiles & warmth 😊",
       "My heart is waiting 😭",
       "You know it’s YES 😏❤️"
     ];
 
-    /* ---------- ELEMENTS ---------- */
-    const yesBtn = document.getElementById("yes");
-    const noBtn = document.getElementById("no");
-    const question = document.getElementById("question");
-    const music = document.getElementById("bgMusic");
-
-    /* ---------- STATE ---------- */
-    let yesSize = 16;
-    let noSize = 16;
-    let messageIndex = 0;
-    let musicStarted = false;
-
-    /* ---------- FUNCTIONS ---------- */
     function playMusicOnce() {
       if (musicStarted) return;
-      music.volume = CONFIG.musicVolume;
+      music.volume = 0.18;
+      music.playbackRate = 0.95;
       music.play().catch(() => {});
       musicStarted = true;
     }
 
-    function handleNoClick() {
+    function typeText(el, text, speed = 45) {
+      el.textContent = "";
+      let i = 0;
+      const timer = setInterval(() => {
+        el.textContent += text.charAt(i);
+        i++;
+        if (i >= text.length) clearInterval(timer);
+      }, speed);
+    }
+
+    noBtn.addEventListener("click", () => {
       playMusicOnce();
 
-      // Grow YES
-      yesSize += CONFIG.yesGrow;
+      noBtn.classList.remove("shake");
+      void noBtn.offsetWidth; // restart animation
+      noBtn.classList.add("shake");
+
+      yesSize += 6;
       yesBtn.style.fontSize = yesSize + "px";
       yesBtn.style.padding = yesSize + "px";
 
-      // Shrink NO
-      noSize -= CONFIG.noShrink;
+      noSize -= 2;
       noBtn.style.fontSize = noSize + "px";
       noBtn.style.padding = (noSize / 2) + "px";
 
-      // Update message
-      question.innerText = MESSAGES[Math.min(messageIndex, MESSAGES.length - 1)];
-      messageIndex++;
+      typeText(question, messages[Math.min(index, messages.length - 1)]);
+      index++;
 
-      if (noSize <= CONFIG.minNoSize) {
+      if (noSize <= 6) {
         noBtn.textContent = "😢";
         noBtn.disabled = true;
       }
-    }
+    });
 
-    function handleYesClick() {
+    yesBtn.addEventListener("click", () => {
       playMusicOnce();
-      document.querySelector(".card").innerHTML = `
-        <h1 style="color: var(--secondary)">
-          Yayyy 💖🥰<br />
-          Nancy said YES!<br /><br />
-          — From Rupam 💌
-        </h1>
+      card.innerHTML = `
+        <div class="final-message">
+          <h1 style="color: var(--pink-dark)">
+            Yayyy 💖🥰<br />
+            Nancy said YES!
+          </h1>
+          <p>
+            I’ve liked you for a while…<br />
+            and this was my little brave moment 🙈
+          </p>
+          <p>— From Rupam 💌</p>
+        </div>
       `;
-    }
+    });
 
-    function spawnHeart() {
+    // Floating hearts
+    setInterval(() => {
       const heart = document.createElement("div");
       heart.className = "heart";
       heart.textContent = "💖";
@@ -194,14 +260,7 @@
       heart.style.animationDuration = 6 + Math.random() * 4 + "s";
       document.body.appendChild(heart);
       setTimeout(() => heart.remove(), 8000);
-    }
-
-    /* ---------- EVENTS ---------- */
-    noBtn.addEventListener("click", handleNoClick);
-    yesBtn.addEventListener("click", handleYesClick);
-
-    /* ---------- HEARTS LOOP ---------- */
-    setInterval(spawnHeart, CONFIG.heartInterval);
+    }, 600);
   </script>
 
 </body>
