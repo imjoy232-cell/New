@@ -4,10 +4,18 @@
   <meta charset="UTF-8" />
   <title>For Nancy 💖</title>
 
+  <!-- ================== STYLES ================== -->
   <style>
+    :root {
+      --primary: #ff4d88;
+      --secondary: #e6005c;
+      --bg-start: #ffccd5;
+      --bg-end: #fff0f3;
+    }
+
     body {
       font-family: "Comic Sans MS", cursive;
-      background: linear-gradient(135deg, #ffccd5, #fff0f3);
+      background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
       display: flex;
       justify-content: center;
       align-items: center;
@@ -17,22 +25,22 @@
       text-align: center;
     }
 
-    .box {
-      background: white;
+    .card {
+      background: #fff;
       padding: 36px;
       border-radius: 24px;
-      box-shadow: 0 20px 45px rgba(0,0,0,0.18);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
       max-width: 340px;
       z-index: 2;
     }
 
     h1 {
-      color: #e6005c;
+      color: var(--secondary);
       margin-bottom: 24px;
       transition: all 0.3s ease;
     }
 
-    button {
+    .actions button {
       border: none;
       border-radius: 14px;
       cursor: pointer;
@@ -43,8 +51,8 @@
     }
 
     #yes {
-      background: #ff4d88;
-      color: white;
+      background: var(--primary);
+      color: #fff;
     }
 
     #no {
@@ -61,10 +69,10 @@
     .heart {
       position: fixed;
       bottom: -20px;
-      color: #ff5c8a;
-      animation: floatUp linear infinite;
-      opacity: 0.8;
       pointer-events: none;
+      color: var(--primary);
+      opacity: 0.8;
+      animation: floatUp linear forwards;
     }
 
     @keyframes floatUp {
@@ -79,37 +87,41 @@
     }
   </style>
 </head>
+
 <body>
 
-  <!-- Ultra-soft romantic piano -->
+  <!-- ================== MUSIC ================== -->
   <audio id="bgMusic" loop>
     <source src="https://cdn.pixabay.com/audio/2023/03/28/audio_f1e6f0b9e6.mp3" type="audio/mpeg">
   </audio>
 
-  <div class="box">
+  <!-- ================== CONTENT ================== -->
+  <main class="card">
     <h1 id="question">
-      Nancy 💖<br>
+      Nancy 💖<br />
       Will you be my Valentine?
     </h1>
 
-    <button id="yes" onclick="yesClicked()">Yes 💘</button>
-    <button id="no">No 🙈</button>
+    <div class="actions">
+      <button id="yes">Yes 💘</button>
+      <button id="no">No 🙈</button>
+    </div>
 
     <div class="hint">(Try clicking No 😉)</div>
-  </div>
+  </main>
 
+  <!-- ================== SCRIPT ================== -->
   <script>
-    const yesBtn = document.getElementById("yes");
-    const noBtn = document.getElementById("no");
-    const question = document.getElementById("question");
-    const music = document.getElementById("bgMusic");
+    /* ---------- CONFIG ---------- */
+    const CONFIG = {
+      yesGrow: 6,
+      noShrink: 2,
+      minNoSize: 6,
+      heartInterval: 600,
+      musicVolume: 0.25
+    };
 
-    let yesSize = 16;
-    let noSize = 16;
-    let clickCount = 0;
-    let musicStarted = false;
-
-    const messages = [
+    const MESSAGES = [
       "Nancy… are you sure? 🥺",
       "That touched my heart 💔",
       "I really like you 💕",
@@ -119,58 +131,77 @@
       "You know it’s YES 😏❤️"
     ];
 
-    function playMusic() {
-      if (!musicStarted) {
-        music.volume = 0.25; // very soft
-        music.play().catch(() => {});
-        musicStarted = true;
-      }
+    /* ---------- ELEMENTS ---------- */
+    const yesBtn = document.getElementById("yes");
+    const noBtn = document.getElementById("no");
+    const question = document.getElementById("question");
+    const music = document.getElementById("bgMusic");
+
+    /* ---------- STATE ---------- */
+    let yesSize = 16;
+    let noSize = 16;
+    let messageIndex = 0;
+    let musicStarted = false;
+
+    /* ---------- FUNCTIONS ---------- */
+    function playMusicOnce() {
+      if (musicStarted) return;
+      music.volume = CONFIG.musicVolume;
+      music.play().catch(() => {});
+      musicStarted = true;
     }
 
-    noBtn.addEventListener("click", () => {
-      playMusic();
+    function handleNoClick() {
+      playMusicOnce();
 
-      yesSize += 6;
+      // Grow YES
+      yesSize += CONFIG.yesGrow;
       yesBtn.style.fontSize = yesSize + "px";
       yesBtn.style.padding = yesSize + "px";
 
-      noSize -= 2;
+      // Shrink NO
+      noSize -= CONFIG.noShrink;
       noBtn.style.fontSize = noSize + "px";
       noBtn.style.padding = (noSize / 2) + "px";
 
-      question.innerText =
-        messages[Math.min(clickCount, messages.length - 1)];
+      // Update message
+      question.innerText = MESSAGES[Math.min(messageIndex, MESSAGES.length - 1)];
+      messageIndex++;
 
-      clickCount++;
-
-      if (noSize <= 6) {
-        noBtn.innerText = "😢";
+      if (noSize <= CONFIG.minNoSize) {
+        noBtn.textContent = "😢";
         noBtn.disabled = true;
       }
-    });
+    }
 
-    function yesClicked() {
-      playMusic();
-      document.body.innerHTML = `
-        <h1 style="color:#e6005c">
-          Yayyy 💖🥰<br>
-          Nancy said YES!<br><br>
+    function handleYesClick() {
+      playMusicOnce();
+      document.querySelector(".card").innerHTML = `
+        <h1 style="color: var(--secondary)">
+          Yayyy 💖🥰<br />
+          Nancy said YES!<br /><br />
           — From Rupam 💌
         </h1>
       `;
     }
 
-    // Floating hearts
-    setInterval(() => {
+    function spawnHeart() {
       const heart = document.createElement("div");
       heart.className = "heart";
-      heart.innerText = "💖";
+      heart.textContent = "💖";
       heart.style.left = Math.random() * 100 + "vw";
-      heart.style.fontSize = (14 + Math.random() * 18) + "px";
-      heart.style.animationDuration = (6 + Math.random() * 4) + "s";
+      heart.style.fontSize = 14 + Math.random() * 18 + "px";
+      heart.style.animationDuration = 6 + Math.random() * 4 + "s";
       document.body.appendChild(heart);
       setTimeout(() => heart.remove(), 8000);
-    }, 600);
+    }
+
+    /* ---------- EVENTS ---------- */
+    noBtn.addEventListener("click", handleNoClick);
+    yesBtn.addEventListener("click", handleYesClick);
+
+    /* ---------- HEARTS LOOP ---------- */
+    setInterval(spawnHeart, CONFIG.heartInterval);
   </script>
 
 </body>
